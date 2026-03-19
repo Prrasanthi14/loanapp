@@ -107,7 +107,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
         assertTrue(response.getRejectionReasons().contains(RejectionReason.CREDIT_SCORE_TOO_LOW));
     }
 
@@ -119,7 +119,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
         assertTrue(response.getRejectionReasons().contains(RejectionReason.AGE_TENURE_LIMIT_EXCEEDED));
     }
 
@@ -131,7 +131,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
         assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_60_PERCENT));
     }
 
@@ -145,7 +145,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
         assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_50_PERCENT));
     }
 
@@ -155,7 +155,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.APPROVED, response.getStatus());
+        assertEquals(ApplicationStatus.APPROVED, response.getApplicationStatus());
         assertNotNull(response.getOffer());
         assertEquals(new BigDecimal("16607.15"), response.getOffer().getEmi());
         assertEquals(new BigDecimal("597857.40"), response.getOffer().getTotalPayable());
