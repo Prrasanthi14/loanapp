@@ -1,26 +1,28 @@
 package com.example.loanservice.service;
 
 import com.example.loanservice.domain.Applicant;
-import com.example.loanservice.domain.ApplicationStatus;
-import com.example.loanservice.domain.EmploymentType;
+import com.example.loanservice.enums.ApplicationStatus;
+import com.example.loanservice.enums.EmploymentType;
 import com.example.loanservice.domain.LoanDetail;
-import com.example.loanservice.domain.LoanPurpose;
-import com.example.loanservice.domain.RiskBand;
+import com.example.loanservice.enums.LoanPurpose;
+import com.example.loanservice.enums.RejectionReason;
+import com.example.loanservice.enums.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
-import com.example.loanservice.repository.LoanEvaluationRepository;
+import com.example.loanservice.entity.LoanApplicationEntity;
+import com.example.loanservice.entity.UserEntity;
+import com.example.loanservice.repository.LoanApplicationRepository;
+import com.example.loanservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,30 +32,36 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class LoanApplicationServiceTest {
 
     @Mock
-    private LoanEvaluationRepository repository;
+    private UserRepository userRepository;
+
+    @Mock
+    private LoanApplicationRepository applicationRepository;
+
+    @Spy
+    private EligibilityRulesEngine rulesEngine = new EligibilityRulesEngine();
+
+    @Spy
+    private FinancialCalculatorService calculatorService = new FinancialCalculatorService();
 
     @InjectMocks
     private LoanApplicationService service;
 
     @BeforeEach
     void setUp() {
-        // Mock save to return the same entity but with an ID
-        Mockito.lenient().when(repository.save(Mockito.any())).thenAnswer(invocation -> {
-            com.example.loanservice.domain.LoanEvaluationResult entity = invocation.getArgument(0);
-            entity.setId(UUID.randomUUID());
-            return entity;
-        });
+        // Mock save to return the same entity
+        Mockito.lenient().when(userRepository.save(Mockito.any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.lenient().when(applicationRepository.save(Mockito.any(LoanApplicationEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
     void testDetermineRiskBand() {
-        assertEquals(RiskBand.LOW, service.determineRiskBand(750));
-        assertEquals(RiskBand.LOW, service.determineRiskBand(800));
-        assertEquals(RiskBand.MEDIUM, service.determineRiskBand(650));
-        assertEquals(RiskBand.MEDIUM, service.determineRiskBand(700));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(600));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(649));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(300)); // Will be rejected later anyway
+        assertEquals(RiskBand.LOW, calculatorService.determineRiskBand(750));
+        assertEquals(RiskBand.LOW, calculatorService.determineRiskBand(800));
+        assertEquals(RiskBand.MEDIUM, calculatorService.determineRiskBand(650));
+        assertEquals(RiskBand.MEDIUM, calculatorService.determineRiskBand(700));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(600));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(649));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(300)); // Will be rejected later anyway
     }
 
     @Test
@@ -66,8 +74,8 @@ class LoanApplicationServiceTest {
         BigDecimal principal = new BigDecimal("500000");
         BigDecimal rate = new BigDecimal("12.00");
         int tenure = 36;
-
-        BigDecimal emi = service.calculateEMI(principal, rate, tenure);
+        
+        BigDecimal emi = calculatorService.calculateEMI(principal, rate, tenure);
 
         // Let's assert against a known good value.
         // 16607.15 is the standard result.
@@ -83,12 +91,12 @@ class LoanApplicationServiceTest {
         loan.setAmount(new BigDecimal("500000")); // <= 1,000,000
 
         // Base 12% + LOW 0% + SALARIED 0% + SIZE <= 10L 0%
-        assertEquals(new BigDecimal("12.00"), service.calculateInterestRate(applicant, loan, RiskBand.LOW));
+        assertEquals(new BigDecimal("12.00"), calculatorService.calculateInterestRate(applicant, loan, RiskBand.LOW));
 
         // Base 12% + MEDIUM 1.5% + SELF_EMPLOYED 1.0% + SIZE > 10L 0.5%
         applicant.setEmploymentType(EmploymentType.SELF_EMPLOYED);
         loan.setAmount(new BigDecimal("1500000"));
-        BigDecimal rate = service.calculateInterestRate(applicant, loan, RiskBand.MEDIUM);
+        BigDecimal rate = calculatorService.calculateInterestRate(applicant, loan, RiskBand.MEDIUM);
         assertEquals(new BigDecimal("15.00"), rate);
     }
 
@@ -99,8 +107,8 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("CREDIT_SCORE_TOO_LOW"));
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.CREDIT_SCORE_TOO_LOW));
     }
 
     @Test
@@ -111,8 +119,8 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("AGE_TENURE_LIMIT_EXCEEDED"));
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.AGE_TENURE_LIMIT_EXCEEDED));
     }
 
     @Test
@@ -123,8 +131,8 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("EMI_EXCEEDS_60_PERCENT"));
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_60_PERCENT));
     }
 
     @Test
@@ -137,8 +145,8 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("EMI_EXCEEDS_50_PERCENT"));
+        assertEquals(ApplicationStatus.REJECTED, response.getApplicationStatus());
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_50_PERCENT));
     }
 
     @Test
@@ -147,7 +155,7 @@ class LoanApplicationServiceTest {
 
         ApplicationResponse response = service.evaluateApplication(request);
 
-        assertEquals(ApplicationStatus.APPROVED, response.getStatus());
+        assertEquals(ApplicationStatus.APPROVED, response.getApplicationStatus());
         assertNotNull(response.getOffer());
         assertEquals(new BigDecimal("16607.15"), response.getOffer().getEmi());
         assertEquals(new BigDecimal("597857.40"), response.getOffer().getTotalPayable());

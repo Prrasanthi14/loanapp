@@ -1,5 +1,6 @@
 package com.example.loanservice.domain;
 
+import com.example.loanservice.enums.LoanPurpose;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
