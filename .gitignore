@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Custom ###
+Loan_Service_Postman_Collection.json
