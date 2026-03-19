@@ -1,5 +1,6 @@
 package com.example.loanservice.domain;
 
+import com.example.loanservice.enums.EmploymentType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

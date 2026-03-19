@@ -2,7 +2,7 @@ package com.example.loanservice.service;
 
 import com.example.loanservice.domain.Applicant;
 import com.example.loanservice.domain.LoanDetail;
-import com.example.loanservice.domain.RejectionReason;
+import com.example.loanservice.enums.RejectionReason;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

@@ -1,8 +1,8 @@
 package com.example.loanservice.dto;
 
-import com.example.loanservice.domain.ApplicationStatus;
-import com.example.loanservice.domain.RejectionReason;
-import com.example.loanservice.domain.RiskBand;
+import com.example.loanservice.enums.ApplicationStatus;
+import com.example.loanservice.enums.RejectionReason;
+import com.example.loanservice.enums.RiskBand;
 import lombok.Builder;
 import lombok.Data;
 

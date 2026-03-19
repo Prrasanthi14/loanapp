@@ -1,15 +1,18 @@
 package com.example.loanservice.service;
 
 import com.example.loanservice.domain.Applicant;
-import com.example.loanservice.domain.ApplicationStatus;
-import com.example.loanservice.domain.EmploymentType;
+import com.example.loanservice.enums.ApplicationStatus;
+import com.example.loanservice.enums.EmploymentType;
 import com.example.loanservice.domain.LoanDetail;
-import com.example.loanservice.domain.LoanPurpose;
-import com.example.loanservice.domain.RejectionReason;
-import com.example.loanservice.domain.RiskBand;
+import com.example.loanservice.enums.LoanPurpose;
+import com.example.loanservice.enums.RejectionReason;
+import com.example.loanservice.enums.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
-import com.example.loanservice.repository.LoanEvaluationRepository;
+import com.example.loanservice.entity.LoanApplicationEntity;
+import com.example.loanservice.entity.UserEntity;
+import com.example.loanservice.repository.LoanApplicationRepository;
+import com.example.loanservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -32,7 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class LoanApplicationServiceTest {
 
     @Mock
-    private LoanEvaluationRepository repository;
+    private UserRepository userRepository;
+
+    @Mock
+    private LoanApplicationRepository applicationRepository;
 
     @Spy
     private EligibilityRulesEngine rulesEngine = new EligibilityRulesEngine();
@@ -45,12 +48,9 @@ class LoanApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Mock save to return the same entity but with an ID
-        Mockito.lenient().when(repository.save(Mockito.any())).thenAnswer(invocation -> {
-            com.example.loanservice.domain.LoanEvaluationResult entity = invocation.getArgument(0);
-            entity.setId(UUID.randomUUID());
-            return entity;
-        });
+        // Mock save to return the same entity
+        Mockito.lenient().when(userRepository.save(Mockito.any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.lenient().when(applicationRepository.save(Mockito.any(LoanApplicationEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

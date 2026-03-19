@@ -1,4 +1,4 @@
-package com.example.loanservice.domain;
+package com.example.loanservice.enums;
 
 public enum RejectionReason {
     CREDIT_SCORE_TOO_LOW,

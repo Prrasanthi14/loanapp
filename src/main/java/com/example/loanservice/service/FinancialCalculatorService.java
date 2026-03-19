@@ -1,9 +1,9 @@
 package com.example.loanservice.service;
 
 import com.example.loanservice.domain.Applicant;
-import com.example.loanservice.domain.EmploymentType;
+import com.example.loanservice.enums.EmploymentType;
 import com.example.loanservice.domain.LoanDetail;
-import com.example.loanservice.domain.RiskBand;
+import com.example.loanservice.enums.RiskBand;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
