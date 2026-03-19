@@ -19,8 +19,7 @@ public class LoanController {
     private final LoanApplicationService loanApplicationService;
 
     @PostMapping
-    public ResponseEntity<ApplicationResponse> evaluateApplication(
-            @Valid @RequestBody LoanApplicationRequest request) {
+    public ResponseEntity<ApplicationResponse> evaluateApplication(@Valid @RequestBody LoanApplicationRequest request) {
         
         ApplicationResponse response = loanApplicationService.evaluateApplication(request);
         return ResponseEntity.ok(response);

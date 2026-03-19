@@ -8,6 +8,9 @@ import com.example.loanservice.domain.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
 import com.example.loanservice.dto.Offer;
+import com.example.loanservice.domain.LoanEvaluationResult;
+import com.example.loanservice.repository.LoanEvaluationRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,7 +20,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class LoanApplicationService {
+
+    private final LoanEvaluationRepository repository;
 
     private static final BigDecimal BASE_INTEREST_RATE = new BigDecimal("12.00");
     private static final BigDecimal LARGE_LOAN_THRESHOLD = new BigDecimal("1000000");
@@ -42,7 +48,7 @@ public class LoanApplicationService {
         RiskBand riskBand = determineRiskBand(applicant.getCreditScore());
 
         if (!rejectionReasons.isEmpty()) {
-            return buildRejectionResponse(rejectionReasons);
+            return buildRejectionResponse(applicant, loan, rejectionReasons);
         }
 
         // Calculate Interest Rate
@@ -67,7 +73,7 @@ public class LoanApplicationService {
         }
 
         if (!rejectionReasons.isEmpty()) {
-            return buildRejectionResponse(rejectionReasons);
+            return buildRejectionResponse(applicant, loan, rejectionReasons);
         }
 
         BigDecimal totalPayable = emi.multiply(new BigDecimal(loan.getTenureMonths()));
@@ -79,8 +85,27 @@ public class LoanApplicationService {
                 .totalPayable(totalPayable.setScale(2, RoundingMode.HALF_UP))
                 .build();
 
+        LoanEvaluationResult entity = LoanEvaluationResult.builder()
+                .applicantName(applicant.getName())
+                .applicantAge(applicant.getAge())
+                .monthlyIncome(applicant.getMonthlyIncome())
+                .employmentType(applicant.getEmploymentType())
+                .creditScore(applicant.getCreditScore())
+                .requestedAmount(loan.getAmount())
+                .requestedTenureMonths(loan.getTenureMonths())
+                .loanPurpose(loan.getPurpose())
+                .status(ApplicationStatus.APPROVED)
+                .riskBand(riskBand)
+                .offerInterestRate(offer.getInterestRate())
+                .offerTenureMonths(offer.getTenureMonths())
+                .offerEmi(offer.getEmi())
+                .offerTotalPayable(offer.getTotalPayable())
+                .build();
+
+        repository.save(entity);
+
         return ApplicationResponse.builder()
-                .applicationId(UUID.randomUUID())
+                .applicationId(entity.getId())
                 .status(ApplicationStatus.APPROVED)
                 .riskBand(riskBand)
                 .offer(offer)
@@ -130,9 +155,24 @@ public class LoanApplicationService {
         return numerator.divide(denominator, 2, RoundingMode.HALF_UP);
     }
 
-    private ApplicationResponse buildRejectionResponse(List<String> reasons) {
+    private ApplicationResponse buildRejectionResponse(Applicant applicant, LoanDetail loan, List<String> reasons) {
+        LoanEvaluationResult entity = LoanEvaluationResult.builder()
+                .applicantName(applicant.getName())
+                .applicantAge(applicant.getAge())
+                .monthlyIncome(applicant.getMonthlyIncome())
+                .employmentType(applicant.getEmploymentType())
+                .creditScore(applicant.getCreditScore())
+                .requestedAmount(loan.getAmount())
+                .requestedTenureMonths(loan.getTenureMonths())
+                .loanPurpose(loan.getPurpose())
+                .status(ApplicationStatus.REJECTED)
+                .rejectionReasons(reasons)
+                .build();
+
+        repository.save(entity);
+
         return ApplicationResponse.builder()
-                .applicationId(UUID.randomUUID())
+                .applicationId(entity.getId())
                 .status(ApplicationStatus.REJECTED)
                 .rejectionReasons(reasons)
                 .build();

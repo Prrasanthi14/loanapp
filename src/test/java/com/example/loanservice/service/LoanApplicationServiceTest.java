@@ -8,24 +8,41 @@ import com.example.loanservice.domain.LoanPurpose;
 import com.example.loanservice.domain.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
+import com.example.loanservice.repository.LoanEvaluationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ExtendWith(MockitoExtension.class)
 class LoanApplicationServiceTest {
 
+    @Mock
+    private LoanEvaluationRepository repository;
+
+    @InjectMocks
     private LoanApplicationService service;
 
     @BeforeEach
     void setUp() {
-        service = new LoanApplicationService();
+        // Mock save to return the same entity but with an ID
+        Mockito.lenient().when(repository.save(Mockito.any())).thenAnswer(invocation -> {
+            com.example.loanservice.domain.LoanEvaluationResult entity = invocation.getArgument(0);
+            entity.setId(UUID.randomUUID());
+            return entity;
+        });
     }
 
     @Test
