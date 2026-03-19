@@ -5,6 +5,7 @@ import com.example.loanservice.domain.ApplicationStatus;
 import com.example.loanservice.domain.EmploymentType;
 import com.example.loanservice.domain.LoanDetail;
 import com.example.loanservice.domain.LoanPurpose;
+import com.example.loanservice.domain.RejectionReason;
 import com.example.loanservice.domain.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
@@ -100,7 +101,7 @@ class LoanApplicationServiceTest {
         ApplicationResponse response = service.evaluateApplication(request);
 
         assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("CREDIT_SCORE_TOO_LOW"));
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.CREDIT_SCORE_TOO_LOW));
     }
 
     @Test
@@ -112,7 +113,7 @@ class LoanApplicationServiceTest {
         ApplicationResponse response = service.evaluateApplication(request);
 
         assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("AGE_TENURE_LIMIT_EXCEEDED"));
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.AGE_TENURE_LIMIT_EXCEEDED));
     }
 
     @Test
@@ -124,7 +125,7 @@ class LoanApplicationServiceTest {
         ApplicationResponse response = service.evaluateApplication(request);
 
         assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("EMI_EXCEEDS_60_PERCENT"));
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_60_PERCENT));
     }
 
     @Test
@@ -138,7 +139,7 @@ class LoanApplicationServiceTest {
         ApplicationResponse response = service.evaluateApplication(request);
 
         assertEquals(ApplicationStatus.REJECTED, response.getStatus());
-        assertTrue(response.getRejectionReasons().contains("EMI_EXCEEDS_50_PERCENT"));
+        assertTrue(response.getRejectionReasons().contains(RejectionReason.EMI_EXCEEDS_50_PERCENT));
     }
 
     @Test

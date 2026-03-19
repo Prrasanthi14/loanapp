@@ -1,6 +1,7 @@
 package com.example.loanservice.dto;
 
 import com.example.loanservice.domain.ApplicationStatus;
+import com.example.loanservice.domain.RejectionReason;
 import com.example.loanservice.domain.RiskBand;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +16,5 @@ public class ApplicationResponse {
     private ApplicationStatus status;
     private RiskBand riskBand;
     private Offer offer;
-    private List<String> rejectionReasons;
+    private List<RejectionReason> rejectionReasons;
 }

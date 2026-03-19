@@ -4,6 +4,7 @@ import com.example.loanservice.domain.Applicant;
 import com.example.loanservice.domain.ApplicationStatus;
 import com.example.loanservice.domain.EmploymentType;
 import com.example.loanservice.domain.LoanDetail;
+import com.example.loanservice.domain.RejectionReason;
 import com.example.loanservice.domain.RiskBand;
 import com.example.loanservice.dto.ApplicationResponse;
 import com.example.loanservice.dto.LoanApplicationRequest;
@@ -32,17 +33,17 @@ public class LoanApplicationService {
         Applicant applicant = request.getApplicant();
         LoanDetail loan = request.getLoan();
 
-        List<String> rejectionReasons = new ArrayList<>();
+        List<RejectionReason> rejectionReasons = new ArrayList<>();
 
         // Basic Eligibility Rules
         if (applicant.getCreditScore() < 600) {
-            rejectionReasons.add("CREDIT_SCORE_TOO_LOW");
+            rejectionReasons.add(RejectionReason.CREDIT_SCORE_TOO_LOW);
         }
 
         BigDecimal ageAsDecimal = new BigDecimal(applicant.getAge());
         BigDecimal tenureInYears = new BigDecimal(loan.getTenureMonths()).divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
         if (ageAsDecimal.add(tenureInYears).compareTo(new BigDecimal("65")) > 0) {
-            rejectionReasons.add("AGE_TENURE_LIMIT_EXCEEDED");
+            rejectionReasons.add(RejectionReason.AGE_TENURE_LIMIT_EXCEEDED);
         }
 
         RiskBand riskBand = determineRiskBand(applicant.getCreditScore());
@@ -63,12 +64,12 @@ public class LoanApplicationService {
         BigDecimal fiftyPercentIncome = monthlyIncome.multiply(new BigDecimal("0.50"));
 
         if (emi.compareTo(sixtyPercentIncome) > 0) {
-            rejectionReasons.add("EMI_EXCEEDS_60_PERCENT");
+            rejectionReasons.add(RejectionReason.EMI_EXCEEDS_60_PERCENT);
         }
 
         if (emi.compareTo(fiftyPercentIncome) > 0) {
-            if (!rejectionReasons.contains("EMI_EXCEEDS_60_PERCENT")) {
-                 rejectionReasons.add("EMI_EXCEEDS_50_PERCENT");
+            if (!rejectionReasons.contains(RejectionReason.EMI_EXCEEDS_60_PERCENT)) {
+                 rejectionReasons.add(RejectionReason.EMI_EXCEEDS_50_PERCENT);
             }
         }
 
@@ -155,7 +156,7 @@ public class LoanApplicationService {
         return numerator.divide(denominator, 2, RoundingMode.HALF_UP);
     }
 
-    private ApplicationResponse buildRejectionResponse(Applicant applicant, LoanDetail loan, List<String> reasons) {
+    private ApplicationResponse buildRejectionResponse(Applicant applicant, LoanDetail loan, List<RejectionReason> reasons) {
         LoanEvaluationResult entity = LoanEvaluationResult.builder()
                 .applicantName(applicant.getName())
                 .applicantAge(applicant.getAge())
