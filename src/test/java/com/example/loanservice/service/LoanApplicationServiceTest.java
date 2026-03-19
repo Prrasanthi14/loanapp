@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mockito;
 
@@ -33,6 +34,12 @@ class LoanApplicationServiceTest {
     @Mock
     private LoanEvaluationRepository repository;
 
+    @Spy
+    private EligibilityRulesEngine rulesEngine = new EligibilityRulesEngine();
+
+    @Spy
+    private FinancialCalculatorService calculatorService = new FinancialCalculatorService();
+
     @InjectMocks
     private LoanApplicationService service;
 
@@ -48,13 +55,13 @@ class LoanApplicationServiceTest {
 
     @Test
     void testDetermineRiskBand() {
-        assertEquals(RiskBand.LOW, service.determineRiskBand(750));
-        assertEquals(RiskBand.LOW, service.determineRiskBand(800));
-        assertEquals(RiskBand.MEDIUM, service.determineRiskBand(650));
-        assertEquals(RiskBand.MEDIUM, service.determineRiskBand(700));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(600));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(649));
-        assertEquals(RiskBand.HIGH, service.determineRiskBand(300)); // Will be rejected later anyway
+        assertEquals(RiskBand.LOW, calculatorService.determineRiskBand(750));
+        assertEquals(RiskBand.LOW, calculatorService.determineRiskBand(800));
+        assertEquals(RiskBand.MEDIUM, calculatorService.determineRiskBand(650));
+        assertEquals(RiskBand.MEDIUM, calculatorService.determineRiskBand(700));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(600));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(649));
+        assertEquals(RiskBand.HIGH, calculatorService.determineRiskBand(300)); // Will be rejected later anyway
     }
 
     @Test
@@ -67,8 +74,8 @@ class LoanApplicationServiceTest {
         BigDecimal principal = new BigDecimal("500000");
         BigDecimal rate = new BigDecimal("12.00");
         int tenure = 36;
-
-        BigDecimal emi = service.calculateEMI(principal, rate, tenure);
+        
+        BigDecimal emi = calculatorService.calculateEMI(principal, rate, tenure);
 
         // Let's assert against a known good value.
         // 16607.15 is the standard result.
@@ -84,12 +91,12 @@ class LoanApplicationServiceTest {
         loan.setAmount(new BigDecimal("500000")); // <= 1,000,000
 
         // Base 12% + LOW 0% + SALARIED 0% + SIZE <= 10L 0%
-        assertEquals(new BigDecimal("12.00"), service.calculateInterestRate(applicant, loan, RiskBand.LOW));
+        assertEquals(new BigDecimal("12.00"), calculatorService.calculateInterestRate(applicant, loan, RiskBand.LOW));
 
         // Base 12% + MEDIUM 1.5% + SELF_EMPLOYED 1.0% + SIZE > 10L 0.5%
         applicant.setEmploymentType(EmploymentType.SELF_EMPLOYED);
         loan.setAmount(new BigDecimal("1500000"));
-        BigDecimal rate = service.calculateInterestRate(applicant, loan, RiskBand.MEDIUM);
+        BigDecimal rate = calculatorService.calculateInterestRate(applicant, loan, RiskBand.MEDIUM);
         assertEquals(new BigDecimal("15.00"), rate);
     }
 
