@@ -10,9 +10,8 @@ The core logic part is broke down into 3 major service logic (considering the Si
 
 ## Key Design Decisions
 1.  **Precision Handling**: Used `BigDecimal` with `RoundingMode.HALF_UP` and a scale of 2 for all currency and percentage calculations to avoid floating-point inaccuracies.
-2.  **Stateless Rules Engine**: The `EligibilityRulesEngine` is designed to be stateless, making it easy to test and potentially extract into a standalone business rules service.
-3.  **Domain-Driven Validation**: Leveraged `Jakarta Bean Validation` (@Valid, @Min, @Max) at the DTO level to catch malformed or out-of-range requests before they reach the business logic.
-4.  **Database Integration**: Switched to database-native auto-incrementing IDs for `UserEntity` to optimize MySQL performance and simplify entity management compared to manual UUID generation.
+2. **Domain-Driven Validation**: Leveraged `Jakarta Bean Validation` (@Valid, @Min, @Max) at the DTO level to catch malformed or out-of-range requests before they reach the business logic.
+3. **Database Integration**: Switched to database-native auto-incrementing IDs for `UserEntity` to optimize MySQL performance and simplify entity management compared to manual UUID generation.
 
 ## Trade-offs Considered
 - **Standard Validation vs. Custom Logic**: Chose to use Bean Validation for range/format checks (Age 21-60, Score 300-900) while keeping business rules (Age + Tenure ≤ 65) in a dedicated service. This separates "well-formed data" from "eligible data".
