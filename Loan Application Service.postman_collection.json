@@ -1,0 +1,277 @@
+{
+  "info": {
+    "_postman_id": "2bf7fbe1-cac9-417e-8548-fdebe83106f6",
+    "name": "Loan Application Service",
+    "description": "Complete test suite for the Loan Application API covering all business rules, eligibility criteria, and global exception handler edge cases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25462469"
+  },
+  "item": [
+    {
+      "name": "1. Approved - LOW Risk",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Pooja\",\n    \"age\": 27,\n    \"monthlyIncome\": 75000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 800\n  },\n  \"loan\": {\n    \"amount\": 500000,\n    \"tenureMonths\": 36,\n    \"purpose\": \"PERSONAL\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Approved - MEDIUM Risk (+ Premium)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Alex Freelance\",\n    \"age\": 40,\n    \"monthlyIncome\": 150000,\n    \"employmentType\": \"SELF_EMPLOYED\",\n    \"creditScore\": 700\n  },\n  \"loan\": {\n    \"amount\": 1500000,\n    \"tenureMonths\": 60,\n    \"purpose\": \"HOME\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Rejected - Credit Score < 600",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Poor Credit Joe\",\n    \"age\": 30,\n    \"monthlyIncome\": 75000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 550\n  },\n  \"loan\": {\n    \"amount\": 500000,\n    \"tenureMonths\": 36,\n    \"purpose\": \"PERSONAL\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Rejected - Age + Tenure > 65",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Senior Applicant\",\n    \"age\": 60,\n    \"monthlyIncome\": 80000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 750\n  },\n  \"loan\": {\n    \"amount\": 800000,\n    \"tenureMonths\": 120,\n    \"purpose\": \"HOME\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Rejected - EMI > 60% of Income",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Low Income High Ask\",\n    \"age\": 35,\n    \"monthlyIncome\": 30000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 720\n  },\n  \"loan\": {\n    \"amount\": 3500000,\n    \"tenureMonths\": 24,\n    \"purpose\": \"AUTO\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Rejected - EMI > 50% of Income",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Borderline Income\",\n    \"age\": 35,\n    \"monthlyIncome\": 60000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 720\n  },\n  \"loan\": {\n    \"amount\": 1500000,\n    \"tenureMonths\": 36,\n    \"purpose\": \"PERSONAL\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Exception (400) - Missing & Invalid Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"\", \n    \"age\": 19, \n    \"monthlyIncome\": -500,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 750\n  },\n  \"loan\": {\n    \"amount\": 5000,\n    \"tenureMonths\": 36,\n    \"purpose\": \"PERSONAL\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        },
+        "description": "Tests MethodArgumentNotValidException. Name is blank, Age < 21, Income < 0, Loan < 10000."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Exception (400) - Malformed JSON Payload",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicant\": {\n    \"name\": \"Broken JSON\",\n    \"age\": \"This is not a number!\",\n    \"monthlyIncome\": 100000,\n    \"employmentType\": \"SALARIED\",\n    \"creditScore\": 800\n  },\n  \"loan\": {\n    \"amount\": 500000,\n    \"tenureMonths\": 36,\n    \"purpose\": \"PERSONAL\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "applications"
+          ]
+        },
+        "description": "Tests HttpMessageNotReadableException due to unparseable data types (Age is a String)."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Actuator - Health Status (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/actuator/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "actuator",
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Actuator - Metrics (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/actuator/metrics",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "actuator",
+            "metrics"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
