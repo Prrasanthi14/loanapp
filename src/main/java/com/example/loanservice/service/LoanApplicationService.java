@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class LoanApplicationService {
         Applicant applicant = request.getApplicant();
         LoanDetail loan = request.getLoan();
 
-        log.info("Starting evaluation service for Applicant Name: {}", applicant.getName());
+        log.info("Starting Core Engine for Applicant Name: {}", applicant.getName());
 
         // 1. Fetch or Create the Normalized User Entity
         UserEntity userEntity = userRepository.findByName(applicant.getName())
@@ -96,6 +97,7 @@ public class LoanApplicationService {
     private ApplicationResponse buildApprovedResponse(UserEntity user, LoanDetail loan, RiskBand riskBand, Offer offerDto) {
         
         LoanApplicationEntity appEntity = LoanApplicationEntity.builder()
+                .applicationUuid(UUID.randomUUID())
                 .user(user)
                 .requestedAmount(loan.getAmount())
                 .requestedTenureMonths(loan.getTenureMonths())
@@ -115,11 +117,11 @@ public class LoanApplicationService {
         appEntity.setOffer(offerEntity);
 
         applicationRepository.save(appEntity);
-        log.info("APPROVED Loan Application ID: {} generated for User ID: {}", appEntity.getId(), user.getId());
+        log.info("APPROVED Loan Application ID: {} generated for User ID: {}", appEntity.getApplicationUuid(), user.getId());
 
         return ApplicationResponse.builder()
-                .applicationId(appEntity.getId())
-                .applicationStatus(ApplicationStatus.APPROVED)
+                .applicationId(appEntity.getApplicationUuid())
+                .status(ApplicationStatus.APPROVED)
                 .riskBand(riskBand)
                 .offer(offerDto)
                 .build();
@@ -128,7 +130,7 @@ public class LoanApplicationService {
     private ApplicationResponse buildRejectionResponse(UserEntity user, LoanDetail loan, RiskBand riskBand, List<RejectionReason> reasons) {
         
         LoanApplicationEntity appEntity = LoanApplicationEntity.builder()
-
+                .applicationUuid(UUID.randomUUID())
                 .user(user)
                 .requestedAmount(loan.getAmount())
                 .requestedTenureMonths(loan.getTenureMonths())
@@ -139,11 +141,11 @@ public class LoanApplicationService {
                 .build();
 
         applicationRepository.save(appEntity);
-        log.info("REJECTED Loan Application ID: {} generated for User ID: {}", appEntity.getId(), user.getId());
+        log.info("REJECTED Loan Application ID: {} generated for User ID: {}", appEntity.getApplicationUuid(), user.getId());
 
         return ApplicationResponse.builder()
-                .applicationId(appEntity.getId())
-                .applicationStatus(ApplicationStatus.REJECTED)
+                .applicationId(appEntity.getApplicationUuid())
+                .status(ApplicationStatus.REJECTED)
                 .rejectionReasons(reasons)
                 .build();
     }

@@ -7,12 +7,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 public class ApplicationResponse {
-    private Long applicationId;
-    private ApplicationStatus applicationStatus;
+    private UUID applicationId;
+    private ApplicationStatus status;
     private RiskBand riskBand;
     private Offer offer;
     private List<RejectionReason> rejectionReasons;
